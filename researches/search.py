@@ -1,3 +1,4 @@
+import asyncio
 from typing import List, Optional
 
 import httpx
@@ -35,9 +36,6 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
         )
         res.raise_for_status()
 
-    with open("index.html", "wb") as f:
-        f.write(res.content)
-
     parser = LexborHTMLParser(res.text)
     snippet = get_snippet(parser)
     rich = get_rich_block(parser)
@@ -54,6 +52,39 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
         web=web,
         flights=flights,
     )
+
+
+async def asearch(
+    q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs
+) -> Result:
+    async with httpx.AsyncClient() as client:
+        res = await client.get(
+            "https://www.google.com/search",
+            params={"q": q, "hl": hl, "client": "opera", "sclient": "gws-wiz-serp"},
+            headers={"User-Agent": ua or user_agent},
+            **kwargs,
+        )
+        res.raise_for_status()
+
+    def job() -> Result:
+        parser = LexborHTMLParser(res.text)
+        snippet = get_snippet(parser)
+        rich = get_rich_block(parser)
+        aside = get_aside_block(parser)
+        weather = get_weather(parser)
+        web = get_web(parser)
+        flights = get_flights(parser)
+
+        return Result(
+            snippet=snippet,
+            rich_block=rich,
+            aside=aside,
+            weather=weather,
+            web=web,
+            flights=flights,
+        )
+
+    return await asyncio.to_thread(job)
 
 
 def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:

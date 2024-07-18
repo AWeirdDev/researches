@@ -11,7 +11,7 @@ class Snippet:
 @dataclass
 class RichBlock:
     image: Optional[str]
-    forecast: Optional[List["PartialWeather"]]
+    forecast: List["PartialWeather"]
 
 
 @dataclass
@@ -43,7 +43,7 @@ class Weather:
     wind_metric: str
     wind_imperial: str
     description: str
-    forecast: List["PartialWeather"]
+    forecast: List["PartialWeatherForReport"]
 
 
 @dataclass

@@ -59,11 +59,11 @@ result.weather?
       ⤷ .wind_imperial: str
       ⤷ .description: str
       ⤷ .forecast: PartialWeatherForReport[]
-                  ⤷ .weekday: str
-                  ⤷ .high_c: str
-                  ⤷ .low_c: str
-                  ⤷ .high_f: str
-                  ⤷ .low_f: str
+                   ⤷ .weekday: str
+                   ⤷ .high_c: str
+                   ⤷ .low_c: str
+                   ⤷ .high_f: str
+                   ⤷ .low_f: str
 
 result.web: Web[]
             ⤷ .title: str

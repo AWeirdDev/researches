@@ -60,9 +60,18 @@ class Web:
 
 
 @dataclass
+class Flight:
+    title: str
+    description: str
+    duration: str
+    price: str
+
+
+@dataclass
 class Result:
     snippet: Optional[Snippet]
     rich_block: Optional[RichBlock]
     aside: Optional[Aside]
     weather: Optional[WeatherForecast]
     web: List[Web]
+    flights: List[Flight]

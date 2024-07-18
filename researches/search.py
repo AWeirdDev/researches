@@ -6,6 +6,7 @@ from selectolax.lexbor import LexborHTMLParser
 from .markdown import get_markdown
 from .schemas import (
     Aside,
+    Flight,
     PartialWeatherForReport,
     Result,
     RichBlock,
@@ -24,7 +25,7 @@ user_agent = (
 )
 
 
-def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs):
+def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Result:
     with httpx.Client() as client:
         res = client.get(
             "https://www.google.com/search",
@@ -43,6 +44,7 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs):
     aside = get_aside_block(parser)
     weather = get_weather(parser)
     web = get_web(parser)
+    flights = get_flights(parser)
 
     return Result(
         snippet=snippet,
@@ -50,6 +52,7 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs):
         aside=aside,
         weather=weather,
         web=web,
+        flights=flights,
     )
 
 
@@ -121,8 +124,8 @@ def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
         high_f = textof(items[1])
 
         items1 = wth.css(".ZXCv8e .wob_t")
-        low_c = textof(items[0])
-        low_f = textof(items[1])
+        low_c = textof(items1[0])
+        low_f = textof(items1[1])
 
         forecast.append(
             PartialWeatherForReport(
@@ -161,6 +164,27 @@ def get_web(parser: LexborHTMLParser) -> List[Web]:
                 title=title,
                 url=anchor,  # type: ignore
                 text=textof(item.css_first(".VwiC3b")),
+            )
+        )
+
+    return items
+
+
+def get_flights(parser: LexborHTMLParser) -> List[Flight]:
+    items = []
+
+    for item in parser.css(".Ww4FFb.vt6azd .wyccme"):
+        title = textof(item.css_first(".ZhosBf"), strip=True)
+        description = textof(item.css_first(".GfzIoc"), strip=True)
+        duration = textof(item.css_first(".TM2JYd"), strip=True)
+        price = textof(item.css_first(".YK0p7d"), strip=True)
+
+        items.append(
+            Flight(
+                title=title,
+                description=description,
+                duration=duration,
+                price=price,
             )
         )
 

@@ -13,5 +13,6 @@ def textof(
 ) -> str:
     return node.text(deep=deep, separator=separator, strip=strip) if node else ""
 
+
 def some(node: Optional[Union[LexborNode, Node]]):
     return node if node else LexborNode()

@@ -1,5 +1,3 @@
 from researches.search import search
 
-print(
-    search("austriaweather")
-)
+print(search("us to japan").flights)

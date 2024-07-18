@@ -36,7 +36,7 @@ await asearch(
 ```
 
 So, what does the `Result` class has to offer? At a glance:
-```ts
+```haskell
 result.snippet?
       ⤷  .text: str
       ⤷  .name: str?

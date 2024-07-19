@@ -59,11 +59,11 @@ result.weather?
       ⤷ .wind_imperial: str
       ⤷ .description: str
       ⤷ .forecast: PartialWeatherForReport[]
-                  ⤷ .weekday: str
-                  ⤷ .high_c: str
-                  ⤷ .low_c: str
-                  ⤷ .high_f: str
-                  ⤷ .low_f: str
+                   ⤷ .weekday: str
+                   ⤷ .high_c: str
+                   ⤷ .low_c: str
+                   ⤷ .high_f: str
+                   ⤷ .low_f: str
 
 result.web: Web[]
             ⤷ .title: str
@@ -90,3 +90,10 @@ Google sucks, but it's actually the knowledge base we all need. Say, there are t
 ...and many more. (Contribute!)
 
 Scraper APIs out there are hella expensive, and ain't no way I'm paying or entering their free tier. So, I made my own that's perfect for extracting data with LLMs.
+
+<br />
+<br />
+
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/0c2e29fd-ea9b-4078-b210-b966a8dfc976" width="800" />
+</div>

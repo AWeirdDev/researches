@@ -9,20 +9,8 @@ class Snippet:
 
 
 @dataclass
-class RichBlock:
-    image: Optional[str]
-    forecast: List["PartialWeather"]
-
-
-@dataclass
 class Aside:
     text: str
-
-
-@dataclass
-class PartialWeather:
-    weekday: str
-    temp: str
 
 
 @dataclass
@@ -68,10 +56,16 @@ class Flight:
 
 
 @dataclass
+class Lyrics:
+    text: str
+    is_partial: bool
+
+
+@dataclass
 class Result:
     snippet: Optional[Snippet]
-    rich_block: Optional[RichBlock]
     aside: Optional[Aside]
     weather: Optional[WeatherForecast]
     web: List[Web]
     flights: List[Flight]
+    lyrics: Optional[Lyrics]

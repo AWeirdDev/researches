@@ -1,0 +1,33 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "researches"
+version = "0.1"
+description = "Researches is a Google search scraper."
+keywords = ["google", "search", "scraper", "research", "llm"]
+authors = [
+  { name = "AWeirdDev", email = "aweirdscratcher@gmail.com" },
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "httpx",
+  "selectolax"
+]
+
+[project.urls]
+"Source" = "https://github.com/AWeirdDev/researches"
+"Bug Tracker" = "https://github.com/AWeirdDev/researches/issues"
+
+[tool.setuptools]
+packages = [
+    "researches"
+]

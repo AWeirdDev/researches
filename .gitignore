@@ -1,2 +1,4 @@
 /activate
 **/__pycache__/
+/dist
+/researches.egg-info

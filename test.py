@@ -1,3 +1,3 @@
 from researches.search import search
 
-print(search("us to japan").flights)
+print(search("never gonna give you up").lyrics)

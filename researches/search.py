@@ -8,11 +8,10 @@ from .markdown import get_markdown
 from .schemas import (
     Aside,
     Flight,
+    Lyrics,
     PartialWeatherForReport,
     Result,
-    RichBlock,
     Snippet,
-    PartialWeather,
     Weather,
     WeatherForecast,
     Web,
@@ -26,6 +25,25 @@ user_agent = (
 )
 
 
+def parse(res: httpx.Response) -> Result:
+    parser = LexborHTMLParser(res.text)
+    snippet = get_snippet(parser)
+    aside = get_aside_block(parser)
+    weather = get_weather(parser)
+    web = get_web(parser)
+    flights = get_flights(parser)
+    lyrics = get_lyrics(parser)
+
+    return Result(
+        snippet=snippet,
+        aside=aside,
+        weather=weather,
+        web=web,
+        flights=flights,
+        lyrics=lyrics,
+    )
+
+
 def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Result:
     with httpx.Client() as client:
         res = client.get(
@@ -36,22 +54,7 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
         )
         res.raise_for_status()
 
-    parser = LexborHTMLParser(res.text)
-    snippet = get_snippet(parser)
-    rich = get_rich_block(parser)
-    aside = get_aside_block(parser)
-    weather = get_weather(parser)
-    web = get_web(parser)
-    flights = get_flights(parser)
-
-    return Result(
-        snippet=snippet,
-        rich_block=rich,
-        aside=aside,
-        weather=weather,
-        web=web,
-        flights=flights,
-    )
+    return parse(res)
 
 
 async def asearch(
@@ -66,31 +69,13 @@ async def asearch(
         )
         res.raise_for_status()
 
-    def job() -> Result:
-        parser = LexborHTMLParser(res.text)
-        snippet = get_snippet(parser)
-        rich = get_rich_block(parser)
-        aside = get_aside_block(parser)
-        weather = get_weather(parser)
-        web = get_web(parser)
-        flights = get_flights(parser)
-
-        return Result(
-            snippet=snippet,
-            rich_block=rich,
-            aside=aside,
-            weather=weather,
-            web=web,
-            flights=flights,
-        )
-
-    return await asyncio.to_thread(job)
+    return await asyncio.to_thread(parse, res)
 
 
 def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
     fsnippet_ele = parser.css_first(".xpdopen .hgKElc")
 
-    # 1. Get featured snippet
+    # Get featured snippet (aka. quick answer)
     featured = (
         Snippet(
             text=get_markdown(fsnippet_ele.html or "", ".hgKElc"),
@@ -103,27 +88,8 @@ def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
     return featured
 
 
-def get_rich_block(parser: LexborHTMLParser) -> Optional[RichBlock]:
-    block = parser.css_first(".e6hL7d")
-    if not block:
-        return None
-
-    forecast = []
-
-    weather = block.css_first(".ij5N5d")
-    if weather:
-        for wth in weather.iter():
-            day = textof(wth.css_first(".eidkGd"))
-            tmp = textof(wth.css_first('[jsname="wcyxJ"]'))
-            forecast.append(PartialWeather(day, tmp))
-
-    return RichBlock(
-        image=some(block.css_first("ol li .PZPZlf")).attributes.get("data-lpage"),
-        forecast=forecast,
-    )
-
-
 def get_aside_block(parser: LexborHTMLParser) -> Optional[Aside]:
+    # Usually wikipedia blocks
     aside = parser.css_first(".xGj8Mb")
     if not aside:
         return None
@@ -132,6 +98,7 @@ def get_aside_block(parser: LexborHTMLParser) -> Optional[Aside]:
 
 
 def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
+    # Get weather. Usually present when using the query "<place> weather"
     block = parser.css_first("#wob_wc")
     if not block:
         return None
@@ -184,6 +151,7 @@ def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
 
 
 def get_web(parser: LexborHTMLParser) -> List[Web]:
+    # Get links
     items = []
 
     for item in parser.css(".N54PNb"):
@@ -202,6 +170,7 @@ def get_web(parser: LexborHTMLParser) -> List[Web]:
 
 
 def get_flights(parser: LexborHTMLParser) -> List[Flight]:
+    # Get flights when using the query "<place> to <place> [flights]"
     items = []
 
     for item in parser.css(".Ww4FFb.vt6azd .wyccme"):
@@ -220,3 +189,18 @@ def get_flights(parser: LexborHTMLParser) -> List[Flight]:
         )
 
     return items
+
+
+def get_lyrics(parser: LexborHTMLParser) -> Optional[Lyrics]:
+    lyrics_ele = parser.css(".xaAUmb .ujudUb span")
+
+    if not lyrics_ele:
+        return None
+
+    lyrics = []
+    for ele in lyrics_ele:
+        lyrics.append(textof(ele, strip=True))
+
+    return Lyrics(
+        text="\n".join(lyrics), is_partial=bool(parser.css_first(".xaAUmb .ujudUb a"))
+    )

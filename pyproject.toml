@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "researches"
-version = "0.1"
+version = "0.2"
 description = "Researches is a Google search scraper."
 keywords = ["google", "search", "scraper", "research", "llm"]
 authors = [

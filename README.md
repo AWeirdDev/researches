@@ -41,12 +41,6 @@ result.snippet?
       ⤷  .text: str
       ⤷  .name: str?
 
-result.rich_block?
-      ⤷  .image: str?
-      ⤷  .forecast: PartialWeather[]
-                    ⤷ .weekday: str
-                    ⤷ .temp: str
-
 result.aside?
       ⤷ .text: str
 
@@ -75,6 +69,10 @@ result.flights: Flight[]
                 ⤷ .description: str
                 ⤷ .duration: str
                 ⤷ .price: str
+
+result.lyrics?
+      ⤷ .text: str
+      ⤷ .is_partial: bool
 ```
 
 ## Background

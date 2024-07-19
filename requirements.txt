@@ -1,0 +1,2 @@
+selectolax
+httpx

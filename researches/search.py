@@ -8,17 +8,17 @@ from .markdown import get_markdown
 from .schemas import (
     Aside,
     Flight,
+    Lyrics,
+    PartialWeather,
     PartialWeatherForReport,
     Result,
     RichBlock,
     Snippet,
-    PartialWeather,
     Weather,
     WeatherForecast,
     Web,
 )
 from .utils import some, textof
-
 
 user_agent = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -43,6 +43,7 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
     weather = get_weather(parser)
     web = get_web(parser)
     flights = get_flights(parser)
+    lyrics = get_lyrics(parser)
 
     return Result(
         snippet=snippet,
@@ -51,11 +52,12 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
         weather=weather,
         web=web,
         flights=flights,
+        lyrics=lyrics,
     )
 
 
 async def asearch(
-    q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs
+    q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs,
 ) -> Result:
     async with httpx.AsyncClient() as client:
         res = await client.get(
@@ -74,6 +76,7 @@ async def asearch(
         weather = get_weather(parser)
         web = get_web(parser)
         flights = get_flights(parser)
+        lyrics = get_lyrics(parser)
 
         return Result(
             snippet=snippet,
@@ -82,6 +85,7 @@ async def asearch(
             weather=weather,
             web=web,
             flights=flights,
+            lyrics=lyrics,
         )
 
     return await asyncio.to_thread(job)
@@ -165,7 +169,7 @@ def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
                 high_f=high_f,
                 low_c=low_c,
                 low_f=low_f,
-            )
+            ),
         )
 
     return WeatherForecast(
@@ -195,8 +199,20 @@ def get_web(parser: LexborHTMLParser) -> List[Web]:
                 title=title,
                 url=anchor,  # type: ignore
                 text=textof(item.css_first(".VwiC3b")),
-            )
+            ),
         )
+
+    return items
+
+
+def get_lyrics(parser: LexborHTMLParser) -> List[Lyrics]:
+    items = []
+    for item in parser.css('div[jsname="U8S5sf"].ujudUb'):
+        spans = item.css('span[jsname="YS01Ge"]')
+        for span in spans:
+            lyric = textof(span, strip=True)
+
+            items.append(Lyrics(text=lyric))
 
     return items
 
@@ -216,7 +232,7 @@ def get_flights(parser: LexborHTMLParser) -> List[Flight]:
                 description=description,
                 duration=duration,
                 price=price,
-            )
+            ),
         )
 
     return items

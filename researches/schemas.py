@@ -68,6 +68,11 @@ class Flight:
 
 
 @dataclass
+class Lyrics:
+    text: str
+
+
+@dataclass
 class Result:
     snippet: Optional[Snippet]
     rich_block: Optional[RichBlock]
@@ -75,3 +80,4 @@ class Result:
     weather: Optional[WeatherForecast]
     web: List[Web]
     flights: List[Flight]
+    lyrics: List[Lyrics]

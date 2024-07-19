@@ -57,6 +57,6 @@ def parse_node_to_markdown(node: Node) -> Node:
 
 
 def replace_headings(node: Node) -> None:
-    for target in ("h1", "h2", "h3", "h4", "h5", "h6"):
+    for target in {"h1", "h2", "h3", "h4", "h5", "h6"}:
         for heading in node.css(target):
             heading.replace_with(f"{'#' * int(target[1])} {textof(heading)}")

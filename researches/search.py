@@ -1,10 +1,10 @@
 import asyncio
 from typing import List, Optional
 
-import httpx
 from selectolax.lexbor import LexborHTMLParser
 
 from .markdown import get_markdown
+from .primp import Client, Response
 from .schemas import (
     Aside,
     Flight,
@@ -25,7 +25,7 @@ user_agent = (
 )
 
 
-def parse(res: httpx.Response) -> Result:
+def parse(res: Response) -> Result:
     parser = LexborHTMLParser(res.text)
     snippet = get_snippet(parser)
     aside = get_aside_block(parser)
@@ -44,31 +44,26 @@ def parse(res: httpx.Response) -> Result:
     )
 
 
-def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Result:
-    with httpx.Client() as client:
-        res = client.get(
-            "https://www.google.com/search",
-            params={"q": q, "hl": hl, "client": "opera", "sclient": "gws-wiz-serp"},
-            headers={"User-Agent": ua or user_agent},
-            **kwargs,
-        )
-        res.raise_for_status()
+def get(q: str, hl: str, ua: Optional[str], **kwargs) -> Response:
+    client = Client(impersonate="chrome_127", verify=False)
+    res = client.get(
+        "https://www.google.com/search",
+        params={"q": q, "hl": hl, "client": "opera"},
+        headers={"User-Agent": ua or user_agent},
+        **kwargs,
+    )
+    assert res.status_code == 200, res.text
+    return res
 
-    return parse(res)
+
+def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Result:
+    return parse(get(q, hl, ua, **kwargs))
 
 
 async def asearch(
     q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs
 ) -> Result:
-    async with httpx.AsyncClient() as client:
-        res = await client.get(
-            "https://www.google.com/search",
-            params={"q": q, "hl": hl, "client": "opera", "sclient": "gws-wiz-serp"},
-            headers={"User-Agent": ua or user_agent},
-            **kwargs,
-        )
-        res.raise_for_status()
-
+    res = await asyncio.to_thread(get, q, hl, ua, **kwargs)
     return await asyncio.to_thread(parse, res)
 
 

@@ -10,7 +10,7 @@ search("Who invented papers?")
 ## Requirements
 - A decent computer
 - Python ≥ 3.9
-- `httpx` – HTTP connections.
+- `primp` – HTTP connections & fingerprint impersonation.
 - `selectolax` – The HTML parser.
 
 ## Usage
@@ -32,7 +32,7 @@ await asearch(
     hl="en",        # language
     ua=None,        # custom user agent or ours
     **kwargs        # kwargs to pass to httpx (optional)
-)
+) -> Result
 ```
 
 So, what does the `Result` class has to offer? At a glance:
@@ -80,7 +80,7 @@ Data comes in different shapes and sizes, and Google played it extremely well. T
 
 Google sucks, but it's actually the knowledge base we all need. Say, there are these types of result pages:
 - **Links** – What made Google, "Google." Or, `&udm=14`.
-- **Rich blocks** – Rich blocks that introduce persons, places and more.
+- ~~**Rich blocks** – Rich blocks that introduce persons, places and more.~~
 - **Weather** – Weather forecast.
 - **Wikipedia (aside)** – Wikipedia text.
 - **Flights** – Flights.

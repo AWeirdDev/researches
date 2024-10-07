@@ -5,7 +5,7 @@ Researches is a vanilla<sup>1</sup> Google scraper. Minimal requirements.
 search("Who invented papers?")
 ```
 
-<sub><sup>1</sup> In context, this refers to raw/unformatted data and contents. `researches` does not clean them up for you, and it's not guranteed to be 100% human-readable. However, feeding to LLMs may help as most of them use word-level tokenizers.</sub>
+<sub><sup>1</sup> For context, this refers to raw/unformatted data and contents. `researches` does not clean them up for you, and it's not guranteed to be 100% human-readable. However, feeding to LLMs may help as most of them use word-level tokenizers.</sub>
 
 ## Requirements
 - A decent computer
@@ -84,6 +84,7 @@ Google sucks, but it's actually the knowledge base we all need. Say, there are t
 - **Weather** – Weather forecast.
 - **Wikipedia (aside)** – Wikipedia text.
 - **Flights** – Flights.
+- **Lyrics** – Both full and partial lyrics.
 
 ...and many more. (Contribute!)
 

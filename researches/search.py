@@ -73,7 +73,7 @@ def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
     # Get featured snippet (aka. quick answer)
     fsnippet_ele = parser.css_first(".xpdopen .hgKElc")
 
-    featured = (
+    return (
         Snippet(
             text=get_markdown(fsnippet_ele.html or "", ".hgKElc"),
             highlighted=textof(fsnippet_ele.css_first("b"), deep=True, strip=True),
@@ -82,7 +82,6 @@ def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
         else None
     )
 
-    return featured
 
 
 def get_aside_block(parser: LexborHTMLParser) -> Optional[Aside]:

@@ -6,6 +6,7 @@ from selectolax.lexbor import LexborHTMLParser
 from .markdown import get_markdown
 from .primp import Client, Response
 from .schemas import (
+    Answer,
     Aside,
     Flight,
     Lyrics,
@@ -17,7 +18,6 @@ from .schemas import (
     Web,
 )
 from .utils import some, textof
-
 
 user_agent = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -33,6 +33,7 @@ def parse(res: Response) -> Result:
     web = get_web(parser)
     flights = get_flights(parser)
     lyrics = get_lyrics(parser)
+    answer = get_answer(parser)
 
     return Result(
         snippet=snippet,
@@ -41,11 +42,12 @@ def parse(res: Response) -> Result:
         web=web,
         flights=flights,
         lyrics=lyrics,
+        answer=answer,
     )
 
 
 def get(q: str, hl: str, ua: Optional[str], **kwargs) -> Response:
-    client = Client(impersonate="chrome_127", verify=False)
+    client = Client(impersonate="chrome_130", timeout=5, verify=False)
     res = client.get(
         "https://www.google.com/search",
         params={"q": q, "hl": hl, "client": "opera"},
@@ -61,16 +63,16 @@ def search(q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs) -> Res
 
 
 async def asearch(
-    q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs
+    q: str, *, hl: str = "en", ua: Optional[str] = None, **kwargs,
 ) -> Result:
     res = await asyncio.to_thread(get, q, hl, ua, **kwargs)
     return await asyncio.to_thread(parse, res)
 
 
 def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
+    # Get featured snippet (aka. quick answer)
     fsnippet_ele = parser.css_first(".xpdopen .hgKElc")
 
-    # Get featured snippet (aka. quick answer)
     featured = (
         Snippet(
             text=get_markdown(fsnippet_ele.html or "", ".hgKElc"),
@@ -85,11 +87,21 @@ def get_snippet(parser: LexborHTMLParser) -> Optional[Snippet]:
 
 def get_aside_block(parser: LexborHTMLParser) -> Optional[Aside]:
     # Usually wikipedia blocks
-    aside = parser.css_first(".xGj8Mb")
-    if not aside:
+    aside_ele = parser.css(".Z1hOCe")
+    detail = (
+        parser.css_first(".SW5pqf.ZZhrTe.xXEKkb.fl").text(strip=True)
+        if parser.css_first(".SW5pqf.ZZhrTe.xXEKkb.fl")
+        else ""
+    )
+
+    if not aside_ele:
         return None
 
-    return Aside(text=aside.text(strip=True, separator=" ").replace("  ", " "))
+    aside_text = ""
+    for item in aside_ele:
+        aside_text += item.text(strip=True) + "\n"
+
+    return Aside(text=aside_text.replace(detail, ""))
 
 
 def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
@@ -127,7 +139,7 @@ def get_weather(parser: LexborHTMLParser) -> Optional[WeatherForecast]:
                 high_f=high_f,
                 low_c=low_c,
                 low_f=low_f,
-            )
+            ),
         )
 
     return WeatherForecast(
@@ -158,7 +170,7 @@ def get_web(parser: LexborHTMLParser) -> List[Web]:
                 title=title,
                 url=anchor,  # type: ignore
                 text=textof(item.css_first(".VwiC3b")),
-            )
+            ),
         )
 
     return items
@@ -180,13 +192,14 @@ def get_flights(parser: LexborHTMLParser) -> List[Flight]:
                 description=description,
                 duration=duration,
                 price=price,
-            )
+            ),
         )
 
     return items
 
 
 def get_lyrics(parser: LexborHTMLParser) -> Optional[Lyrics]:
+    # Get lyrics
     lyrics_ele = parser.css(".xaAUmb .ujudUb span")
 
     if not lyrics_ele:
@@ -197,5 +210,17 @@ def get_lyrics(parser: LexborHTMLParser) -> Optional[Lyrics]:
         lyrics.append(textof(ele, strip=True))
 
     return Lyrics(
-        text="\n".join(lyrics), is_partial=bool(parser.css_first(".xaAUmb .ujudUb a"))
+        text="\n".join(lyrics),
+        is_partial=bool(parser.css_first(".xaAUmb .ujudUb a")),
+        source=textof(".S4TQId"),
     )
+
+
+def get_answer(parser: LexborHTMLParser) -> Optional[Answer]:
+    # Get Answer
+    answer_ele = parser.css_first(".Z0LcW.t2b5Cf") or parser.css_first(".QpPSMb")
+
+    if not answer_ele:
+        return None
+
+    return Answer(text=answer_ele.text(strip=True))

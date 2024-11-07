@@ -59,7 +59,11 @@ class Flight:
 class Lyrics:
     text: str
     is_partial: bool
+    source: str
 
+@dataclass
+class Answer:
+    text: Optional[str] = None
 
 @dataclass
 class Result:
@@ -69,3 +73,4 @@ class Result:
     web: List[Web]
     flights: List[Flight]
     lyrics: Optional[Lyrics]
+    answer: Optional[Answer]

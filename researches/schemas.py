@@ -59,6 +59,39 @@ class Flight:
 class Lyrics:
     text: str
     is_partial: bool
+    source: str
+
+
+@dataclass
+class Answer:
+    text: Optional[str] = None
+
+
+@dataclass
+class News:
+    title: Optional[str] = None
+    source: Optional[str] = None
+    url: Optional[str] = None
+    date: Optional[str] = None
+
+
+@dataclass
+class Source:
+    language: str
+    text: str
+    pronunciation: Optional[str] = None
+
+@dataclass
+class Target:
+    language: str
+    text: str
+    pronunciation: Optional[str] = None
+
+
+@dataclass
+class Translation:
+    source: Source
+    target: Target
 
 
 @dataclass
@@ -69,3 +102,6 @@ class Result:
     web: List[Web]
     flights: List[Flight]
     lyrics: Optional[Lyrics]
+    answer: Optional[Answer]
+    news: Optional[News]
+    translation: Optional[Translation]

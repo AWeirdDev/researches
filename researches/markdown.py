@@ -9,8 +9,10 @@ def get_markdown(html: str, target: str) -> str:
     It may not look good if not formatted.
 
     Args:
+    ----
         html (str): HTML string.
         target (str): CSS selector to the target. Used to unwrap the target.
+
     """
     parser = HTMLParser(html)
     n = parse_node_to_markdown(parser.css_first(target))
@@ -55,6 +57,6 @@ def parse_node_to_markdown(node: Node) -> Node:
 
 
 def replace_headings(node: Node) -> None:
-    for target in {"h1", "h2", "h3", "h4", "h5", "h6"}:
+    for target in ("h1", "h2", "h3", "h4", "h5", "h6"):
         for heading in node.css(target):
             heading.replace_with(f"{'#' * int(target[1])} {textof(heading)}")
